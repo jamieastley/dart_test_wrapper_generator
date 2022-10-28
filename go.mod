@@ -1,4 +1,4 @@
-module dart_test_wrapper
+module dart_test_wrapper_generator
 
 go 1.18
 

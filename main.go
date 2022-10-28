@@ -8,6 +8,16 @@ import (
 	"strings"
 )
 
+const defaultTemplate = `{{#imports}}
+   import '{{Path}}' as {{Alias}};
+{{/imports}}
+
+void main() {
+{{#imports}}
+    {{Alias}}.main();
+{{/imports}}
+}`
+
 func main() {
 
 	args := parseArgs()
@@ -23,7 +33,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	result := mustache.RenderFile("wrapper_test.dart.mustache", CreateMustacheData(imports))
+	result := RenderMustache(args.Template, consoleLogger, &imports)
 
 	fileErr := f.writeFile(result, fmt.Sprintf("%s/%s.dart", args.Path, args.OutputFilename))
 	if fileErr != nil {
@@ -32,7 +42,7 @@ func main() {
 	}
 
 	fmt.Println("")
-	consoleLogger.Info("Added", len(imports), "test imports to", args.OutputFilename)
+	fmt.Printf("Added %d test imports to %s", len(imports), args.OutputFilename)
 }
 
 func parseTestFiles(fr fileManager, args *CliArgs, logger *ConsoleLogger) ([]DartImport, error) {
@@ -60,4 +70,18 @@ func parseTestFiles(fr fileManager, args *CliArgs, logger *ConsoleLogger) ([]Dar
 	}
 
 	return dartImports, nil
+}
+
+func RenderMustache(templatePath string, logger *ConsoleLogger, imports *[]DartImport) string {
+	data := map[string]*[]DartImport{
+		"imports": imports,
+	}
+
+	if templatePath != "" {
+		logger.Debug("Using mustache template located at", templatePath)
+		return mustache.RenderFile(templatePath, data)
+	}
+
+	logger.Debug("Using default Dart mustache template")
+	return mustache.Render(defaultTemplate, data)
 }
