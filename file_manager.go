@@ -8,11 +8,12 @@ import (
 
 type FileReader interface {
 	getTestFiles(path string) ([]string, error)
+	writeFile(output string, path string) error
 }
 
-type fileReader struct{}
+type fileManager struct{}
 
-func (t *fileReader) getTestFiles(path string) ([]string, error) {
+func (t *fileManager) getTestFiles(path string) ([]string, error) {
 	var files []string
 	fileErr := filepath.Walk(path, func(currentPath string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -29,4 +30,19 @@ func (t *fileReader) getTestFiles(path string) ([]string, error) {
 	})
 
 	return files, fileErr
+}
+
+func (t *fileManager) writeFile(output string, filePath string) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, writeErr := file.WriteString(output)
+	if writeErr != nil {
+		return writeErr
+	}
+
+	return nil
 }
