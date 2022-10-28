@@ -1,20 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 )
 
-type FileReader interface {
+type FileManager interface {
 	getTestFiles(path string) ([]string, error)
 	writeFile(output string, path string) error
 }
 
-type fileManager struct{}
+type fileManager struct {
+	Logger Logger
+}
 
 func (t *fileManager) getTestFiles(path string) ([]string, error) {
 	var files []string
+	t.Logger.Debug("Looking for test files in", path)
 	fileErr := filepath.Walk(path, func(currentPath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -24,7 +26,6 @@ func (t *fileManager) getTestFiles(path string) ([]string, error) {
 			return nil
 		}
 
-		fmt.Println(currentPath)
 		files = append(files, currentPath)
 		return nil
 	})
@@ -33,6 +34,7 @@ func (t *fileManager) getTestFiles(path string) ([]string, error) {
 }
 
 func (t *fileManager) writeFile(output string, filePath string) error {
+	t.Logger.Debug("Writing output file to", filePath)
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -43,6 +45,7 @@ func (t *fileManager) writeFile(output string, filePath string) error {
 	if writeErr != nil {
 		return writeErr
 	}
+	t.Logger.Debug("Successfully wrote output file to", filePath)
 
 	return nil
 }

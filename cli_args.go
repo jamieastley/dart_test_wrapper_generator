@@ -9,14 +9,14 @@ func parseArgs() *CliArgs {
 	flag.Parse()
 
 	return &CliArgs{
-		Path:       *path,
-		OutputFile: *outputFile,
-		Verbose:    *verbose,
+		Path:           *path,
+		OutputFilename: *outputFile,
+		Verbose:        *verbose,
 	}
 }
 
 type CliArgs struct {
-	Path       string
-	OutputFile string
-	Verbose    bool
+	Path           string
+	OutputFilename string
+	Verbose        bool
 }
