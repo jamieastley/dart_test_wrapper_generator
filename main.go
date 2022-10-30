@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/hoisie/mustache"
 	"log"
@@ -27,7 +28,7 @@ func main() {
 	}
 	defer consoleLogger.logger.Sync()
 
-	imports, err := parseTestFiles(f, args, consoleLogger)
+	imports, err := ParseTestFiles(&f, args, consoleLogger)
 	if err != nil {
 		consoleLogger.logger.Error(err)
 		log.Fatal(err)
@@ -45,7 +46,7 @@ func main() {
 	fmt.Printf("Added %d test imports to %s", len(imports), args.OutputFilename)
 }
 
-func parseTestFiles(fr fileManager, args *CliArgs, logger *ConsoleLogger) ([]DartImport, error) {
+func ParseTestFiles(fr FileManager, args *CliArgs, logger Logger) ([]DartImport, error) {
 	var dartImports []DartImport
 	pathPattern := regexp.MustCompile("^/\\S+/test/")
 	filenamePattern := regexp.MustCompile("[a-zA-Z_]+_test")
@@ -54,6 +55,11 @@ func parseTestFiles(fr fileManager, args *CliArgs, logger *ConsoleLogger) ([]Dar
 	if err != nil {
 		return nil, err
 	}
+
+	if len(files) == 0 {
+		return []DartImport{}, errors.New("no files found")
+	}
+
 	for _, f := range files {
 		if strings.Contains(f, "_test.dart") {
 			relPath := pathPattern.ReplaceAllString(f, "")
@@ -67,6 +73,9 @@ func parseTestFiles(fr fileManager, args *CliArgs, logger *ConsoleLogger) ([]Dar
 				})
 			}
 		}
+	}
+	if dartImports == nil {
+		return []DartImport{}, errors.New("no test files found")
 	}
 
 	return dartImports, nil
