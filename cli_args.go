@@ -1,6 +1,9 @@
 package main
 
-import "flag"
+import (
+	"flag"
+	"path/filepath"
+)
 
 func parseArgs() *CliArgs {
 	path := flag.String("path", "", "Path of the test directory")
@@ -10,7 +13,7 @@ func parseArgs() *CliArgs {
 	flag.Parse()
 
 	return &CliArgs{
-		Path:           *path,
+		Path:           filepath.Clean(*path),
 		OutputFilename: *outputFile,
 		Template:       *template,
 		Verbose:        *verbose,
