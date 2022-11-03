@@ -45,9 +45,9 @@ func TestParseTestFiles(t *testing.T) {
 		{
 			mockFileManager: &mockFileManager{
 				TestFiles: []string{
-					"models/model_helper.dart",
-					"models/model_test.dart",
-					"models/another_model_test.dart",
+					"/home/models/model_helper.dart",
+					"/home/models/model_test.dart",
+					"/home/models/another_model_test.dart",
 				},
 				Error: nil,
 			},
