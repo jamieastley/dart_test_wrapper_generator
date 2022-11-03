@@ -5,19 +5,18 @@ import (
 	"fmt"
 	"github.com/hoisie/mustache"
 	"log"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
 
 const defaultTemplate = `{{#imports}}
-   import '{{Path}}' as {{Alias}};
+import '{{Path}}' as {{Alias}};
 {{/imports}}
-
 void main() {
 {{#imports}}
     {{Alias}}.main();
-{{/imports}}
-}`
+{{/imports}}}`
 
 func main() {
 
@@ -48,7 +47,7 @@ func main() {
 
 func ParseTestFiles(fr FileManager, args *CliArgs, logger Logger) ([]DartImport, error) {
 	var dartImports []DartImport
-	pathPattern := regexp.MustCompile("^/\\S+/test/")
+
 	filenamePattern := regexp.MustCompile("[a-zA-Z_]+_test")
 
 	files, err := fr.getTestFiles(args.Path)
@@ -62,14 +61,14 @@ func ParseTestFiles(fr FileManager, args *CliArgs, logger Logger) ([]DartImport,
 
 	for _, f := range files {
 		if strings.Contains(f, "_test.dart") {
-			relPath := pathPattern.ReplaceAllString(f, "")
-			importAlias := filenamePattern.FindString(relPath)
+			rel, _ := filepath.Rel(args.Path, f)
+			importAlias := filenamePattern.FindString(rel)
 
 			if importAlias != args.OutputFilename {
 				logger.Debug(fmt.Sprintf("Adding %s", importAlias))
 				dartImports = append(dartImports, DartImport{
 					Alias: importAlias,
-					Path:  relPath,
+					Path:  filepath.ToSlash(rel),
 				})
 			}
 		}
